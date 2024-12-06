@@ -2,7 +2,7 @@ import { expect, type Locator, type Page } from '@playwright/test';
 
 export class CheckoutPage {
     readonly page: Page;
-    readonly toCheckoutButton: Locator
+    readonly toCheckoutButton: Locator;
 
     constructor(page: Page) {
         this.page = page;
@@ -10,7 +10,11 @@ export class CheckoutPage {
     }
 
     async confirmPurchase() {
-        expect(await this.page.title()).not.toContain('Just a moment');
-    }
+        // Ensure that the page title does not contain "Just a moment", which would indicate the page is still loading
+        await expect(this.page.title()).not.toContain('Just a moment');
 
+        // Additional validation: confirm that the "Download for free" button is visible
+        await expect(this.toCheckoutButton).toBeVisible();
+        await this.toCheckoutButton.click();
+    }
 }

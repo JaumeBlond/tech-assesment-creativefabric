@@ -1,25 +1,28 @@
-import { test , expect } from '@playwright/test';
+// Importing Playwright test utilities and necessary Page Objects
+import { test, expect } from '@playwright/test';
 import { ProductPage } from '../pages/productPage';
 import { AuthModal } from '../modals/authModal';
 import { CheckoutPage } from '../pages/cartConfirmPage';
 import { PaymentModal } from '../modals/paymentModal';
 import { CartPage } from '../pages/cartPage';
+
 const BASE_URL = 'https://www.creativefabrica.com/product';
 
+// Array of product URLs to be tested
 const products = [
   { productUrl: '/christmas-tree-lantern-bundle/' }
 ];
 
-// Loop through each product
 products.forEach(({ productUrl }) => {
   test.describe(`Testing product: ${productUrl}`, () => {
 
+    // Navigate to product page before each test
     test.beforeEach(async ({ page }) => {
       await page.goto(BASE_URL + productUrl);
     });
 
+    // Capture a screenshot if a test fails
     test.afterEach(async ({ page }, testInfo) => {
-      // If the test failed, take a screenshot and attach it to the report
       if (testInfo.status === 'failed') {
         const screenshot = await page.screenshot({ path: `screenshots/${testInfo.title.replace(/ /g, '_')}.png` });
         await testInfo.attach('screenshot', { body: screenshot, contentType: 'image/png' });
@@ -28,12 +31,11 @@ products.forEach(({ productUrl }) => {
 
     test('Page content loads properly', async ({ page }) => {
       const productPage = new ProductPage(page);
-
       const currentProduct = productUrl.replace(/\//g, '').replace(/-/g, ' ');
       const currentTitle = await productPage.title;
       expect(currentTitle.toLowerCase()).toContain(currentProduct.toLowerCase());
 
-      //Check main web content loads properly given unlogged user
+      // Validate visibility of key elements
       await expect(productPage.promoBanner).toBeVisible();
       await expect(productPage.loginButton).toBeVisible();
       await expect(productPage.registerButton).toBeVisible();
@@ -46,9 +48,7 @@ products.forEach(({ productUrl }) => {
       await expect(productPage.singlepurchaseSwitch).toBeVisible();
       await expect(productPage.addToFav).toBeVisible();
       await expect(productPage.reviewButton).toBeDisabled();
-      await expect(productPage.singlepurchaseSwitch).toBeVisible();
       await expect(productPage.footerColophon).toBeVisible();
-
     });
 
     test('Unlogged user can purchase an asset', async ({ page }) => {
@@ -57,11 +57,11 @@ products.forEach(({ productUrl }) => {
       const authModal = new AuthModal(page);
       const paymentModal = new PaymentModal(page);
 
-      await productPage.userClicksOn("FreeDownload") //FROM HERE WILL FAIL DUE TO CLOUDFARE VALIDATION FOR BOTS
-      await checkoutPage.confirmPurchase()
-      await authModal.login()
-      await checkoutPage.confirmPurchase()
-      await paymentModal.choosePaymentMethod()
+      await productPage.userClicksOn("FreeDownload"); // This will likely fail due to Cloudflare validation
+      await checkoutPage.confirmPurchase();
+      await authModal.login();
+      await checkoutPage.confirmPurchase();
+      await paymentModal.choosePaymentMethod();
     });
 
     test('Logged user can purchase an asset', async ({ page }) => {
@@ -69,11 +69,10 @@ products.forEach(({ productUrl }) => {
       const authModal = new AuthModal(page);
       const paymentModal = new PaymentModal(page);
 
-      await authModal.login()
-      await productPage.userClicksOn("FreeDownload") //FROM HERE WILL FAIL DUE TO CLOUDFARE VALIDATION FOR BOTS
-      await paymentModal.choosePaymentMethod()
-      await paymentModal.finishPurchase()
-
+      await authModal.login();
+      await productPage.userClicksOn("FreeDownload"); // This will likely fail due to Cloudflare validation
+      await paymentModal.choosePaymentMethod();
+      await paymentModal.finishPurchase();
     });
 
     test('Switch to single purchase and buy the asset', async ({ page }) => {
@@ -83,51 +82,35 @@ products.forEach(({ productUrl }) => {
 
       const currentProduct = productUrl.replace(/\//g, '').replace(/-/g, ' ');
 
-
-      await authModal.login()
-      await productPage.changeToSinglePurchase()
-      await productPage.userClicksOn("AddToCart") //FROM HERE WILL FAIL DUE TO CLOUDFARE VALIDATION FOR BOTS
-      await cartPage.checkProductAndProceed(currentProduct)
-      await cartPage.proceedToPayment()
+      await authModal.login();
+      await productPage.changeToSinglePurchase();
+      await productPage.userClicksOn("AddToCart"); // This will likely fail due to Cloudflare validation
+      await cartPage.checkProductAndProceed(currentProduct);
+      await cartPage.proceedToPayment();
     });
 
+    // Test for new user subscribing via trial period
     test('New user subscribe [Trial period]', async ({ page }) => {
       const productPage = new ProductPage(page);
       const authModal = new AuthModal(page);
       const paymentModal = new PaymentModal(page);
 
-      await authModal.login()
-      await productPage.userClicksOn("FreeTrial") //FROM HERE WILL FAIL DUE TO CLOUDFARE VALIDATION FOR BOTS
-      await paymentModal.choosePaymentMethod()
-      await paymentModal.finishPurchase()
+      await authModal.login();
+      await productPage.userClicksOn("FreeTrial"); // This will likely fail due to Cloudflare validation
+      await paymentModal.choosePaymentMethod();
+      await paymentModal.finishPurchase();
     });
 
-
-    test.skip('Favorite the item', async ({ page }) => {
-      const productPage = new ProductPage(page);
-      const authModal = new AuthModal(page);
-
-      await authModal.login()
-      await productPage.userClicksOn("FavItem")
-      await productPage.upsellBannerShows() //Not Implemented and appears when unfaving which might not be a desired behaviour
-      await productPage.checkItemIsfav()
-    });
-
-
-    test('Suscribe yearly ', async ({ page }) => {
+    // Test for subscribing to a yearly plan
+    test('Suscribe yearly', async ({ page }) => {
       const productPage = new ProductPage(page);
       const authModal = new AuthModal(page);
       const paymentModal = new PaymentModal(page);
 
-      authModal.login()
-      productPage.userClicksOn("SwitchYealy") //FROM HERE WILL FAIL DUE TO CLOUDFARE VALIDATION ON FOREING ACCOUNTS AND BOTS
-      paymentModal.choosePaymentMethod()
-      paymentModal.finishPurchase()
-    });
-
-
-    test.skip('Add a review', async ({ page }) => {
-      //To implement
+      await authModal.login();
+      await productPage.userClicksOn("SwitchYealy"); // This will likely fail due to Cloudflare validation
+      await paymentModal.choosePaymentMethod();
+      await paymentModal.finishPurchase();
     });
 
   });

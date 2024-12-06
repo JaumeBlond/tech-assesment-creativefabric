@@ -23,7 +23,6 @@ export class ProductPage {
     readonly upsellBanner: Locator;
     readonly upsellBannerClose: Locator;
 
-
     constructor(page: Page) {
         this.page = page;
         this.title = page.title()
@@ -46,7 +45,6 @@ export class ProductPage {
         this.footerColophon = page.locator('#colophon')
         this.upsellBanner = page.locator('#promo-upsell-popup-favorite')
         this.upsellBannerClose = page.locator('#promo-upsell-popup-favorite-close')
-
     }
 
     async userClicksOn(clickOn: string) {
@@ -64,21 +62,24 @@ export class ProductPage {
             throw new Error(`Invalid click target: ${clickOn}`);
         }
 
+        // Wait for the button to be visible before clicking it
         await buttonToClick.waitFor({ state: 'visible', timeout: 5000 });
         await buttonToClick.click();
     }
 
     async checkItemIsfav() {
-        expect(this.page.locator('button.favorite-on')).toBeVisible
+        const favoriteButton = this.page.locator('button.favorite-on');
+        await expect(favoriteButton).toBeVisible();
     }
 
     async upsellBannerShows() {
-        await this.upsellBanner.isVisible()
-        await this.upsellBannerClose.click()
+        // Ensure upsell banner is visible
+        await expect(this.upsellBanner).toBeVisible();
+        // Close the banner after showing it
+        await this.upsellBannerClose.click();
     }
 
     async changeToSinglePurchase() {
         await this.singlepurchaseSwitch.click();
     }
-
 }

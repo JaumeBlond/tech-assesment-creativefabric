@@ -6,26 +6,27 @@ export class PaymentModal {
   readonly payFreeTrial: Locator;
   readonly confirmAndPay: Locator;
 
-
   constructor(page: Page) {
     this.page = page;
-    this.paypalMethod = page.locator('div[data-value="paypal"]')
-    this.payFreeTrial = page.getByText('Activate free trial')
-    this.confirmAndPay = page.getByText('Confirm and pay')
+    this.paypalMethod = page.locator('div[data-value="paypal"]');
+    this.payFreeTrial = page.getByText('Activate free trial');
+    this.confirmAndPay = page.getByText('Confirm and pay');
   }
 
   async finishPurchase() {
     try {
-      this.payFreeTrial.click()
+      await this.payFreeTrial.click();
     } catch {
-      this.confirmAndPay.click()
+      await this.confirmAndPay.click();
     }
+
     if (this.page.url().includes("paypal")) {
-      //IMPLEMENT PAYMENT IN SANDBOX IN FUTURE
+      // PAYMENT IN SANDBOX: Implement payment steps in the future if PayPal sandbox is to be used
+      // Example: Fill in sandbox credentials and confirm the payment.
     }
   }
 
-  async choosePaymentMethod() { //ONLY IMPLEMENTED PAYPAL FOR THE TECH TASK BUT CAN BE REUSABLE BY ADDING OPTION ON WHICH METHOD AND FILLING DE STEPS IN THE MIDDLE
-    this.paypalMethod.click()
+  async choosePaymentMethod() {
+    await this.paypalMethod.click();
   }
 }
